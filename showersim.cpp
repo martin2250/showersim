@@ -65,10 +65,11 @@ struct Simulation {
 
         double sum = 0;
         for (int i = 0; i < count; i++) {
-            double r = dexp(1.)(generator);
+            double r = dexp(1)(generator);
             random_distr[gen][i] = r;
             sum += r;
         }
+        sum /= total;
         for (int i = 0; i < count; i++) {
             random_distr[gen][i] /= sum;
         }
@@ -198,7 +199,6 @@ struct Simulation {
                 emag(d_end, e / N_tot / 2, true, gen+1);
             }
         } else {
-            double r = duni(0., 1.)(generator);
             neutrino(d_end, e/2, gen+1);
             muon(d_end, e/2, gen+1);
         }
