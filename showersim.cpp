@@ -140,12 +140,14 @@ struct Simulation {
         }
 
         if (e > 77e6) {
+            double *e_new = distribute(e, 2, gen);
+
             if (photon) {
-                emag(d_end, e/2, false, gen+1);
-                emag(d_end, e/2, false, gen+1);
+                emag(d_end, e_new[0], false, gen+1);
+                emag(d_end, e_new[1], false, gen+1);
             } else {
-                emag(d_end, e/2, true, gen+1);
-                emag(d_end, e/2, false, gen+1);
+                emag(d_end, e_new[0], true, gen+1);
+                emag(d_end, e_new[1], false, gen+1);
             }
         }
     }
@@ -162,8 +164,9 @@ struct Simulation {
         trace(energy, d, d_end, e);
         trace(muons, d, d_end, 1);
 
-        neutrino(d_end, e/2, gen+1);
-        emag(d_end, e/2, false, gen+1);
+        double *e_new = distribute(e, 2, gen);
+        neutrino(d_end, e_new[0], gen+1);
+        emag    (d_end, e_new[0], false, gen+1);
     }
 
     // simulate a neutrino with energy <e> starting at depth d
@@ -190,17 +193,20 @@ struct Simulation {
 
         if (interaction < decay) {
             size_t N_ch = 10, N_0 = 5, N_tot = N_ch + N_0;
+            double *e_new = distribute(e * 2./3., N_ch, gen);
             // produce new charged pions
             for (int i = 0; i < N_ch; i++) {
-                pion(d_end, e / N_tot, gen+1);
+                pion(d_end, e_new[i], gen+1);
             }
+            e_new = distribute(e * 1./3., 2*N_0, gen);
             // produce 2*N_0 new photons
             for (int i = 0; i < (2*N_0); i++) {
-                emag(d_end, e / N_tot / 2, true, gen+1);
+                emag(d_end, e_new[i], true, gen+1);
             }
         } else {
-            neutrino(d_end, e/2, gen+1);
-            muon(d_end, e/2, gen+1);
+            double *e_new = distribute(e * 1./3., 2, gen);
+            neutrino(d_end, e_new[0], gen+1);
+            muon    (d_end, e_new[1], gen+1);
         }
     };
 };
