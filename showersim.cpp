@@ -1,7 +1,5 @@
-#include <vector>
 #include <iostream>
 #include <random>
-#include <algorithm>
 #include <iomanip>
 
 using namespace std;
