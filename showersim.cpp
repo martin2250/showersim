@@ -81,7 +81,7 @@ struct Simulation {
     void count_start (size_t gen) {
         particles_total++;
         if (particles_total % 100000 == 0) {
-            cerr << setw(12) <<  particles_total << setw(4) << gen << '\r' << std::flush;
+            cerr << setw(12) << scientific << (double)particles_total << setw(4) << gen << '\r' << std::flush;
         }
     }
 
