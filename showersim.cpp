@@ -85,8 +85,19 @@ struct Simulation {
     void count_start (size_t gen) {
         particles_total++;
         if (particles_total % 100000 == 0) {
-            cerr << setw(12) <<  particles_total << setw(4) << gen << endl;
+            cerr << setw(12) <<  particles_total << setw(4) << gen << '\r' << std::flush;
         }
+    }
+
+    // register a local energy deposit
+    void deposit (double *target, meters_t depth, double value) {
+        size_t i = depth / depth_step;
+
+        if (i >= n_points) {
+            return;
+        }
+
+        target[i] += value / depth_step;
     }
 
     // register a particle in an array
@@ -146,6 +157,8 @@ struct Simulation {
                 emag(d_end, e/2, true, gen+1);
                 emag(d_end, e/2, false, gen+1);
             }
+        } else {
+            deposit(ionization, d_end, e);
         }
     }
 
@@ -169,7 +182,7 @@ struct Simulation {
     void neutrino (meters_t d, eV_t e, size_t gen) {
         count_start(gen);
         (void)e;
-        
+
         trace(neutrinos, d, d + depth_step * n_points, 1);
     }
 
@@ -239,6 +252,7 @@ int main() {
    
     s->nucleus(0, 1e15, 1);
 
+    cerr << endl;
     for (size_t i = 0; i < n_points; i++)  {
         cout << i * s->depth_step << '\t';
         cout << s->particles[i] << '\t';
@@ -248,7 +262,8 @@ int main() {
         cout << s->photons[i] << '\t';
         cout << s->muons[i] << '\t';
         cout << s->neutrinos[i] << '\t';
-        cout << s->remainin_energy[i];
+        cout << s->remainin_energy[i] << '\t';
+        cout << s->ionization[i];
         cout << endl;
     }
 };
