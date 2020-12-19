@@ -22,6 +22,7 @@ struct Simulation {
     double *photons;
     double *muons;
     double *neutrinos;
+    double *nuclei;
     eV_t   *energy;
 
     std::mt19937 generator;
@@ -41,6 +42,7 @@ struct Simulation {
         this->photons = new double[n_points]();
         this->muons = new double[n_points]();
         this->neutrinos = new double[n_points]();
+        this->nuclei = new double[n_points]();
         this->energy = new eV_t[n_points]();
 
         this->c_us = 299.792458;
@@ -123,12 +125,12 @@ struct Simulation {
     void emag (meters_t d, eV_t e, bool photon, size_t gen) {
         count_start(gen);
 
-        meters_t λ_int = 3.039E+04 * 1e-2;
+        meters_t lambda_int = 3.039E+04 * 1e-2;
         if (photon) {
-            λ_int *= 9.0 / 7;
+            lambda_int *= 9.0 / 7;
         }
 
-        meters_t interaction = dexp(1./λ_int)(generator);
+        meters_t interaction = dexp(1./lambda_int)(generator);
         meters_t d_end = d + interaction;
 
         trace(energy, d, d_end, e);
@@ -154,9 +156,9 @@ struct Simulation {
     void muon (meters_t d, eV_t e, size_t gen) {
         count_start(gen);
 
-        us_t τ = 2.2;
+        us_t tau = 2.2;
 
-        meters_t decay = dexp(1./τ)(generator) * c_us * e / 105.6e6;
+        meters_t decay = dexp(1./tau)(generator) * c_us * e / 105.6e6;
         meters_t d_end = d + decay;
 
         trace(energy, d, d_end, e);
@@ -173,15 +175,41 @@ struct Simulation {
         trace(neutrinos, d, d + depth_step * n_points, 1);
     }
 
+    // simulate a nucleus with energy <e> starting at depth d
+    void nucleus (meters_t d, eV_t e, size_t gen) {
+        count_start(gen);
+
+        us_t tau = 1e10;
+        meters_t lambda_int = 205e-2;
+        meters_t decay = dexp(1./tau)(generator) * c_us * e / 139.6e6;
+        meters_t interaction = dexp(1./lambda_int)(generator);
+        meters_t d_end = d + min(decay, interaction);
+
+        trace(energy, d, d_end, e);
+        trace(nuclei, d, d_end, 1);
+
+        if (interaction < decay) {
+            size_t N_ch = 10;
+            // produce new charged pions
+            for (int i = 0; i < N_ch; i++) {
+                pion(d_end, 0.9 * e / N_ch, gen+1);
+                muon(d_end, 0.1 * e / N_ch, gen+1);
+            }
+        } else {
+            nucleus(d_end, e/2, gen+1);
+            nucleus(d_end, e/2, gen+1);
+        }
+    }
+
     // simulate a pion with energy <e> starting at depth d
     void pion (meters_t d, eV_t e, size_t gen) {
         count_start(gen);
 
-        us_t τ = 2.6033e-2;
-        meters_t λ_int = 7.477E+04 * 1e-2;
+        us_t tau = 2.6033e-2;
+        meters_t lambda_int = 7.477E+04 * 1e-2;
 
-        meters_t decay = dexp(1./τ)(generator) * c_us * e / 139.6e6;
-        meters_t interaction = dexp(1./λ_int)(generator);
+        meters_t decay = dexp(1./tau)(generator) * c_us * e / 139.6e6;
+        meters_t interaction = dexp(1./lambda_int)(generator);
 
         meters_t d_end = d + min(decay, interaction);
 
@@ -211,12 +239,12 @@ int main() {
 
     auto s = new Simulation(n_points, depth_total / n_points);
    
-    // s->emag(0, 1e15, true);
-    s->pion(0, 1e14, 0);
+    s->nucleus(0, 1e15, 1);
 
     for (size_t i = 0; i < n_points; i++)  {
         cout << i * s->depth_step << '\t';
         cout << s->particles[i] << '\t';
+        cout << s->nuclei[i] << '\t';
         cout << s->pions[i] << '\t';
         cout << s->electrons[i] << '\t';
         cout << s->photons[i] << '\t';
@@ -225,5 +253,4 @@ int main() {
         cout << s->energy[i];
         cout << endl;
     }
-    cout << endl;
 };
