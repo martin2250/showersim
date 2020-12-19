@@ -14,7 +14,6 @@ struct Simulation {
     size_t n_points;
     meters_t depth_step;
 
-    double *particles;
     double *pions;
     double *electrons;
     double *photons;
@@ -35,7 +34,6 @@ struct Simulation {
         depth_step(depth_step),
         particles_total(0)
     {
-        this->particles = new double[n_points]();
         this->pions = new double[n_points]();
         this->electrons = new double[n_points]();
         this->photons = new double[n_points]();
@@ -250,10 +248,9 @@ int main() {
    
     s->nucleus(0, 1e15, 1);
 
-    cerr << endl;
+    cerr << "simulated " << scientific << (double)s->particles_total << " particles in total" << endl;
     for (size_t i = 0; i < n_points; i++)  {
         cout << i * s->depth_step << '\t';
-        cout << s->particles[i] << '\t';
         cout << s->nuclei[i] << '\t';
         cout << s->pions[i] << '\t';
         cout << s->electrons[i] << '\t';
