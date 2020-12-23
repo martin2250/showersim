@@ -40,7 +40,7 @@ struct Simulation {
         this->muons = new double[n_points]();
         this->neutrinos = new double[n_points]();
         this->nuclei = new double[n_points]();
-        this->remainin_energy = new eV_t[n_points]();
+        this->remaining_energy = new eV_t[n_points]();
         this->ionization = new eV_t[n_points]();
 
         this->c_us = 299.792458;
@@ -137,7 +137,7 @@ struct Simulation {
         meters_t interaction = dexp(1./lambda_int)(generator);
         meters_t d_end = d + interaction;
 
-        trace(remainin_energy, d, d_end, e);
+        trace(remaining_energy, d, d_end, e);
 
         if (photon) {
             trace(photons, d, d_end, 1);
@@ -167,7 +167,7 @@ struct Simulation {
         meters_t decay = dexp(1./tau)(generator) * c_us * e / 105.6e6;
         meters_t d_end = d + decay;
 
-        trace(remainin_energy, d, d_end, e);
+        trace(remaining_energy, d, d_end, e);
         trace(muons, d, d_end, 1);
 
         neutrino(d_end, e/2, gen+1);
@@ -192,7 +192,7 @@ struct Simulation {
         meters_t interaction = dexp(1./lambda_int)(generator);
         meters_t d_end = d + min(decay, interaction);
 
-        trace(remainin_energy, d, d_end, e);
+        trace(remaining_energy, d, d_end, e);
         trace(nuclei, d, d_end, 1);
 
         if (interaction < decay) {
@@ -220,7 +220,7 @@ struct Simulation {
 
         meters_t d_end = d + min(decay, interaction);
 
-        trace(remainin_energy, d, d_end, e);
+        trace(remaining_energy, d, d_end, e);
         trace(pions, d, d_end, 1);
 
         if (interaction < decay) {
@@ -257,7 +257,7 @@ int main() {
         cout << s->photons[i] << '\t';
         cout << s->muons[i] << '\t';
         cout << s->neutrinos[i] << '\t';
-        cout << s->remainin_energy[i] << '\t';
+        cout << s->remaining_energy[i] << '\t';
         cout << s->ionization[i];
         cout << endl;
     }
