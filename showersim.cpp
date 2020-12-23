@@ -14,14 +14,14 @@ struct Simulation {
     size_t n_points;
     meters_t depth_step;
 
-    double *pions;
-    double *electrons;
-    double *photons;
-    double *muons;
-    double *neutrinos;
-    double *nuclei;
-    eV_t   *remainin_energy;
-    eV_t   *ionization;
+    double * __restrict__ pions;
+    double * __restrict__ electrons;
+    double * __restrict__ photons;
+    double * __restrict__ muons;
+    double * __restrict__ neutrinos;
+    double * __restrict__ nuclei;
+    eV_t   * __restrict__ remaining_energy;
+    eV_t   * __restrict__ ionization;
 
     std::mt19937 generator;
 
